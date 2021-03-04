@@ -1,11 +1,15 @@
 import React, { useState } from 'react'
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import TodoItem from '../components/TodoItem';
+import { Feather } from '@expo/vector-icons';
 
 const TodoListScreen = () => {
 
+
   const [todoText, setTodoText] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [selectedTodoId, setSelectedTodoId] = useState();
 
   const [todos, setTodos] = useState([
     {
@@ -28,93 +32,84 @@ const TodoListScreen = () => {
       title: "Pederi kızdır",
       completed: false
     },
-    {
-      id: 5,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 6,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 7,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 8,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 9,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 10,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 11,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 12,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 13,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 14,
-      title: "Pederi kızdır",
-      completed: false
-    },
-    {
-      id: 15,
-      title: "Pederi kızdır",
-      completed: false
-    },
+
   ]);
 
   const handleAddTodo = () => {
-    alert("Hacı sen hayırdır..." + todoText)
+    const newTodo = {
+      id: Date.now(),
+      title: todoText,
+      completed: false
+    };
+    setTodos([
+      ...todos,
+      newTodo
+    ]);
+    setTodoText("");
+
+  }
+
+  const handleDeleteTodo = (id) => {
+    const tempTodos = todos.filter(todo => todo.id !== id);
+    setTodos(tempTodos);
+
+  }
+  const handleUpdateTodo = (id) => {
+    const tempTodo = todos.filter(todo => todo.id === id)[0];
+    setTodoText(tempTodo.title);
+    setSelectedTodoId(id);
+    setEditMode(true);
+
+  }
+
+  const handleChangeTodo = () => {
+
+    const tempTodos = todos.map(todo => {
+      if (todo.id === selectedTodoId) {
+        todo.title = todoText
+        return todo;
+      }
+      return todo;
+    });
+
+    setTodos(tempTodos);
+    setTodoText("")
+    setEditMode(false)
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>Gny</Text>
         <Text style={styles.logoText1}>Notes</Text>
       </View>
 
       <View style={styles.todoContainer}>
-        <ScrollView>
-
-          {
-            todos.map(todo => (
-              <TodoItem key={todo.id} todo={todo} />
-            ))
-          }
-        </ScrollView>
-
+        <FlatList
+          data={todos}
+          keyExtractor={item => item.id.toString()}
+          renderItem={({ item, index }) =>
+            <TodoItem todo={item}
+              handleUpdateTodo={handleUpdateTodo}
+              handleDeleteTodo={handleDeleteTodo} />} />
 
       </View>
       <View style={styles.todoInputContainer}>
         <TextInput value={todoText} onChangeText={setTodoText} style={styles.todoInput} placeholder="Ne yapmak istiyorsunuz?" />
-        <TouchableOpacity onPress={handleAddTodo}>
-          <Ionicons name="md-add" size={24} color="black" />
-        </TouchableOpacity>
+
+        {
+          !editMode ? (<TouchableOpacity onPress={handleAddTodo}>
+            <Ionicons name="md-add" size={30} color="black" />
+          </TouchableOpacity>) : (
+              <TouchableOpacity onPress={handleChangeTodo}>
+                <Feather name="edit" size={30} color="green" />
+              </TouchableOpacity>
+            )
+        }
+
+
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
@@ -123,8 +118,10 @@ export default TodoListScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginTop: Platform.OS == "android" ? 40 : 0,
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: "#D4DCFF"
   },
   logoContainer: {
     flexDirection: "row",
@@ -140,7 +137,7 @@ const styles = StyleSheet.create({
   logoText1: {
     fontSize: 30,
     fontFamily: "Poppins_500Medium",
-    color: "#C4E538"
+    color: "white"
   },
 
   todoInputContainer: {
@@ -151,8 +148,8 @@ const styles = StyleSheet.create({
     padding: 10,
     bottom: 30,
     left: 20,
-    borderBottomColor: "lightgrey",
-    borderBottomWidth: 1,
+    borderBottomColor: "grey",
+    borderBottomWidth: 2,
   }
 
 
