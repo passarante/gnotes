@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
-import { SafeAreaView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { SafeAreaView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, KeyboardAvoidingView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
 import TodoItem from '../components/TodoItem';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TodoListScreen = () => {
 
@@ -12,48 +13,81 @@ const TodoListScreen = () => {
   const [selectedTodoId, setSelectedTodoId] = useState();
 
   const [todos, setTodos] = useState([
-    {
-      id: 1,
-      title: "Dişlerini Fırçala",
-      completed: false
-    },
-    {
-      id: 2,
-      title: "Çiçeğe su ver",
-      completed: false
-    },
-    {
-      id: 3,
-      title: "Elini zımbala",
-      completed: false
-    },
-    {
-      id: 4,
-      title: "Pederi kızdır",
-      completed: false
-    },
+    // {
+    //   id: 1,
+    //   title: "Dişlerini Fırçala",
+    //   completed: false
+    // },
+    // {
+    //   id: 2,
+    //   title: "Çiçeğe su ver",
+    //   completed: false
+    // },
+    // {
+    //   id: 3,
+    //   title: "Elini zımbala",
+    //   completed: false
+    // },
+    // {
+    //   id: 4,
+    //   title: "Pederi kızdır",
+    //   completed: false
+    // },
 
   ]);
 
-  const handleAddTodo = () => {
+  const getStorage = async () => {
+    const storageTodos = await AsyncStorage.getItem('@todos')
+
+    setTodos(JSON.parse(storageTodos));
+  }
+
+  const setStorage = async (tempTodos) => {
+    try {
+      await AsyncStorage.setItem('@todos', JSON.stringify(tempTodos))
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  useEffect(() => {
+    getStorage()
+
+  }, [])
+
+  useEffect(() => {
+    setStorage(todos)
+  }, [todos])
+
+
+  const handleAddTodo = async () => {
     const newTodo = {
       id: Date.now(),
       title: todoText,
       completed: false
     };
-    setTodos([
+
+    const tempTodos = [
       ...todos,
       newTodo
-    ]);
+    ]
+    setTodos(tempTodos);
+
+
     setTodoText("");
 
   }
 
-  const handleDeleteTodo = (id) => {
+  const handleDeleteTodo = async (id) => {
     const tempTodos = todos.filter(todo => todo.id !== id);
     setTodos(tempTodos);
+    setTodoText("");
+    setSelectedTodoId(null);
+    setEditMode(false);
+
 
   }
+
   const handleUpdateTodo = (id) => {
     const tempTodo = todos.filter(todo => todo.id === id)[0];
     setTodoText(tempTodo.title);
@@ -62,7 +96,7 @@ const TodoListScreen = () => {
 
   }
 
-  const handleChangeTodo = () => {
+  const handleChangeTodo = async () => {
 
     const tempTodos = todos.map(todo => {
       if (todo.id === selectedTodoId) {
@@ -79,36 +113,41 @@ const TodoListScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>Gny</Text>
-        <Text style={styles.logoText1}>Notes</Text>
-      </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <View style={styles.logoContainer}>
+          <Text style={styles.logoText}>Gny</Text>
+          <Text style={styles.logoText1}>Notes</Text>
+        </View>
 
-      <View style={styles.todoContainer}>
-        <FlatList
-          data={todos}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item, index }) =>
-            <TodoItem todo={item}
-              handleUpdateTodo={handleUpdateTodo}
-              handleDeleteTodo={handleDeleteTodo} />} />
+        <View style={styles.todoContainer}>
+          <FlatList
+            data={todos}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item, index }) =>
+              <TodoItem todo={item}
+                handleUpdateTodo={handleUpdateTodo}
+                handleDeleteTodo={handleDeleteTodo} />} />
 
-      </View>
-      <View style={styles.todoInputContainer}>
-        <TextInput value={todoText} onChangeText={setTodoText} style={styles.todoInput} placeholder="Ne yapmak istiyorsunuz?" />
+        </View>
+        <View style={styles.todoInputContainer}>
+          <TextInput value={todoText} onChangeText={setTodoText} style={styles.todoInput} placeholder="Ne yapmak istiyorsunuz?" />
 
-        {
-          !editMode ? (<TouchableOpacity onPress={handleAddTodo}>
-            <Ionicons name="md-add" size={30} color="black" />
-          </TouchableOpacity>) : (
+          {
+            !editMode ? (<TouchableOpacity onPress={handleAddTodo}>
+              <Ionicons name="md-add" size={30} color="black" />
+            </TouchableOpacity>) : (
               <TouchableOpacity onPress={handleChangeTodo}>
                 <Feather name="edit" size={30} color="green" />
               </TouchableOpacity>
             )
-        }
+          }
 
 
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }
