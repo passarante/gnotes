@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { SafeAreaView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, FlatList, KeyboardAvoidingView } from 'react-native'
+import {
+  SafeAreaView, Platform, StyleSheet, Text,
+  TextInput, TouchableOpacity, View, KeyboardAvoidingView, FlatList
+} from 'react-native'
 import { Ionicons } from '@expo/vector-icons';
-import TodoItem from '../components/TodoItem';
+
 import { Feather } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getStorage, setStorage } from '../helpers';
+import TodoListCard from '../components/TodoListCard';
 
 const TodoListScreen = () => {
+
+  const rnd = Math.floor(Math.random() * 3);
+  const colors = ['pink', 'pink', 'pink', 'pink'];
 
 
   const [todoText, setTodoText] = useState("");
@@ -13,50 +20,69 @@ const TodoListScreen = () => {
   const [selectedTodoId, setSelectedTodoId] = useState();
 
   const [todos, setTodos] = useState([
-    // {
-    //   id: 1,
-    //   title: "Dişlerini Fırçala",
-    //   completed: false
-    // },
-    // {
-    //   id: 2,
-    //   title: "Çiçeğe su ver",
-    //   completed: false
-    // },
-    // {
-    //   id: 3,
-    //   title: "Elini zımbala",
-    //   completed: false
-    // },
-    // {
-    //   id: 4,
-    //   title: "Pederi kızdır",
-    //   completed: false
-    // },
-
+    {
+      "id": 1,
+      "name": "Okul",
+      "color": "#badc58",
+      "tasks": [
+        {
+          "title": "Hocayı döv",
+          "completed": true
+        },
+        {
+          "title": "Kütüphaneciye söv",
+          "completed": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Ev",
+      "color": "#eb4d4b",
+      "tasks": [
+        {
+          "title": "sadsadsad ",
+          "completed": true
+        },
+        {
+          "title": "asdsadsad asdsadsa",
+          "completed": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Tatil",
+      "color": "#ffbe76",
+      "tasks": [
+        {
+          "title": "sadsadsad ",
+          "completed": true
+        },
+        {
+          "title": "asdsadsad asdsadsa",
+          "completed": true
+        }
+      ]
+    },
   ]);
 
-  const getStorage = async () => {
-    const storageTodos = await AsyncStorage.getItem('@todos')
 
-    setTodos(JSON.parse(storageTodos));
-  }
 
-  const setStorage = async (tempTodos) => {
-    try {
-      await AsyncStorage.setItem('@todos', JSON.stringify(tempTodos))
-    } catch (e) {
-      console.log(e);
-    }
-  }
+
 
   useEffect(() => {
-    getStorage()
+    // getStorage('@todos').then(res => {
+    //   console.log("RES", res);
+    //   setTodos(JSON.parse(res));
+    // }).catch(err => console.log(err))
 
   }, [])
 
+
+
   useEffect(() => {
-    setStorage(todos)
+    // setStorage("@todos", todos)
   }, [todos])
 
 
@@ -112,10 +138,10 @@ const TodoListScreen = () => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors[rnd] }]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+        style={[styles.container, { backgroundColor: colors[rnd] }]}
       >
         <View style={styles.logoContainer}>
           <Text style={styles.logoText}>Gny</Text>
@@ -123,16 +149,14 @@ const TodoListScreen = () => {
         </View>
 
         <View style={styles.todoContainer}>
-          <FlatList
-            data={todos}
+          <FlatList data={todos} horizontal showsHorizontalScrollIndicator={false}
             keyExtractor={item => item.id.toString()}
+            contentContainerStyle={{ padding: 10 }}
             renderItem={({ item, index }) =>
-              <TodoItem todo={item}
-                handleUpdateTodo={handleUpdateTodo}
-                handleDeleteTodo={handleDeleteTodo} />} />
+              <View style={{ margin: 10 }}><TodoListCard list={item} /></View>} />
 
         </View>
-        <View style={styles.todoInputContainer}>
+        {/* <View style={styles.todoInputContainer}>
           <TextInput value={todoText} onChangeText={setTodoText} style={styles.todoInput} placeholder="Ne yapmak istiyorsunuz?" />
 
           {
@@ -145,8 +169,7 @@ const TodoListScreen = () => {
             )
           }
 
-
-        </View>
+        </View> */}
       </KeyboardAvoidingView>
     </SafeAreaView>
   )
@@ -159,7 +182,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: Platform.OS == "android" ? 40 : 0,
     justifyContent: 'center',
-    padding: 20,
+    padding: 10,
     backgroundColor: "#D4DCFF"
   },
   logoContainer: {
@@ -178,18 +201,46 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_500Medium",
     color: "white"
   },
-
-  todoInputContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    position: "absolute",
+  todoContainer: {
     padding: 10,
-    bottom: 30,
-    left: 20,
-    borderBottomColor: "grey",
-    borderBottomWidth: 2,
-  }
+    height: 400
+  },
+
+  // todoInputContainer: {
+  //   width: "100%",
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  //   position: "absolute",
+  //   padding: 10,
+  //   bottom: 30,
+  //   left: 20,
+  //   borderBottomColor: "grey",
+  //   borderBottomWidth: 2,
+  // },
+  card: {
+    height: 300,
+    width: 250,
+    backgroundColor: "white",
+    elevation: 5,
+    borderRadius: 15,
+    padding: 10,
+    alignItems: "center"
+  },
+  cardHeader: {
+    marginBottom: 20,
+  },
+  cardHeaderText: {
+    fontSize: 30, color: "black", fontWeight: "bold"
+  },
+  cardBody: {
+    backgroundColor: "white",
+    width: 230,
+    height: 200,
+    borderRadius: 10,
+    elevation: 3,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
 
 
 })
