@@ -8,18 +8,14 @@ const TodoListCard = ({ list }) => {
         <Text style={styles.cardHeaderText}>{list.name}</Text>
       </View>
       <View style={styles.cardBody}>
-        <View>
-          <Text>
-            <View style={{ width: 60, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ fontSize: 40, color: "black" }}>10</Text>
-            </View>
-            <View style={{ width: 60, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ fontSize: 40 }} >/</Text >
-            </View>
-            <View style={{ width: 60, justifyContent: 'center', alignItems: 'center' }}>
-              <Text style={{ fontSize: 40, color: list.color }}>32</Text>
-            </View>
-          </Text>
+        <View style={styles.cardBodyItemContainer}>
+          <Text style={styles.numberText}>3</Text>
+          <Text style={styles.detailText}>Tamamlanmamış</Text>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.cardBodyItemContainer}>
+          <Text style={styles.numberText}>3</Text>
+          <Text style={styles.detailText}>Tamamlanan</Text>
         </View>
       </View>
     </View>
@@ -39,20 +35,32 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   cardHeader: {
+    flex: 1,
     marginBottom: 20,
   },
   cardHeaderText: {
-    fontSize: 30, color: "black", fontWeight: "bold"
+    fontSize: 30, color: "white", fontWeight: "bold"
   },
-  cardBody: {
-    backgroundColor: "white",
-    width: 230,
-    height: 200,
-    borderRadius: 10,
-    elevation: 3,
+  cardBodyItemContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center'
   },
+  divider: {
+    height: 1,
+    backgroundColor: "gray",
+  },
+  numberText: {
+    color: "white",
+    fontSize: 50,
+
+  },
+  detailText: {
+    color: "white",
+    fontSize: 18
+
+  },
+
 
 
 })
